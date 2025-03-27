@@ -4,15 +4,15 @@ on:
   [workflow_dispatch]
 
 jobs:
-  publish_images:
+  publish-runner-image:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - name: build image
+      - name: Build Docker Image
         run: |
           docker build . -t thatssatyadocker/github-runner:latest
-      - name: push image to docker hub
+      - name: Push to Docker Hub
         run: |
           docker login -u thatssatyadocker -p ${{ secrets.DOCKER_HUB_SECRET }}
           docker push thatssatyadocker/github-runner:latest
