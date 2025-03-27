@@ -1,7 +1,9 @@
 name: Build and Publish image to Docker Hub
 
 on:
-  [workflow_dispatch]
+  push:
+    branches:
+      - master
 
 jobs:
   publish-runner-image:
