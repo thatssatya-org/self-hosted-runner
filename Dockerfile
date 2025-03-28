@@ -10,7 +10,9 @@ ADD https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actio
 WORKDIR /home/docker/actions-runner
 
 # Download and extract the GitHub Actions runner
-RUN tar xzf /home/docker/temp/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz
+RUN tar xzf /home/docker/temp/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
+    && ./bin/installdependencies.sh \
+    && rm -rf /home/docker/temp
 
 # Production image stage
 FROM ubuntu:24.04
@@ -22,8 +24,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 
 COPY --from=build /home/docker/actions-runner .
 
-RUN ./bin/installdependencies.sh \
-    && useradd -m docker \
+RUN useradd -m docker \
     && chown -R docker /home/docker
 
 # Copy the start script and make it executable
