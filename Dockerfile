@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 ARG RUNNER_VERSION="2.323.0"
 
 # Install required dependencies
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     curl jq build-essential libssl-dev libffi-dev libicu-dev python3 python3-venv python3-dev python3-pip \
     && rm -rf /var/lib/apt/lists/*  # Cleanup to reduce image size
 
