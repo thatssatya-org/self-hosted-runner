@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish-runner-image:
-    runs-on: 8797af1dbf7e
+    runs-on: self-hosted-runners
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
