@@ -1,27 +1,30 @@
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS build
 
 # Set GitHub runner version
 ARG RUNNER_VERSION="2.323.0"
 
-# Install required dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl jq build-essential libssl-dev libffi-dev libicu-dev python3 python3-venv python3-dev python3-pip \
-    && rm -rf /var/lib/apt/lists/*  # Cleanup to reduce image size
-
-# Create a non-root user for running the GitHub Actions runner
-RUN useradd -m docker
+ADD https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
+    /home/docker/temp/
 
 # Set working directory
 WORKDIR /home/docker/actions-runner
 
 # Download and extract the GitHub Actions runner
-RUN curl -L -o actions-runner-linux-arm64.tar.gz \
-    https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
-    && tar xzf actions-runner-linux-arm64.tar.gz \
-    && rm actions-runner-linux-arm64.tar.gz  # Cleanup tarball to save space
+RUN tar xzf /home/docker/temp/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz
 
-# Install additional dependencies for the runner
-RUN chown -R docker /home/docker && ./bin/installdependencies.sh
+# Production image stage
+FROM ubuntu:24.04
+WORKDIR /home/docker/actions-runner
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    curl jq libicu-dev python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /home/docker/actions-runner .
+
+RUN ./bin/installdependencies.sh \
+    && useradd -m docker \
+    && chown -R docker /home/docker
 
 # Copy the start script and make it executable
 COPY start.sh /home/docker/actions-runner/start.sh
