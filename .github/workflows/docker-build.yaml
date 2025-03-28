@@ -7,13 +7,13 @@ on:
 
 jobs:
   publish-runner-image:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Build linux/arm64 Docker Image
         run: |
-          docker build -t thatssatyadocker/github-runner:latest .
+          docker build --platform="linux/arm64" -t thatssatyadocker/github-runner:latest .
       - name: Push to Docker Hub
         run: |
           docker login -u thatssatyadocker -p ${{ secrets.DOCKER_HUB_SECRET }}
