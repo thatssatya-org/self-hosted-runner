@@ -18,9 +18,27 @@ RUN tar xzf /home/docker/temp/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.g
 FROM ubuntu:24.04
 WORKDIR /home/docker/actions-runner
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl jq libicu-dev python3-pip \
+ADD https://download.docker.com/linux/ubuntu/gpg /etc/apt/keyrings/docker.asc
+
+## Add Docker's official GPG key:
+RUN apt-get update  \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates curl jq libicu-dev python3-pip \
+    && rm -rf /var/lib/apt/lists/* \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
+
+
+#RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#    curl docker-ce-cli jq libicu-dev python3-pip \
+#    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /home/docker/actions-runner .
 
