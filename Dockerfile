@@ -1,33 +1,34 @@
 FROM ubuntu:24.04
 
-# set the github runner version
+# Set GitHub runner version
 ARG RUNNER_VERSION="2.323.0"
 
-# update the base packages and add a non-sudo user
-RUN apt-get update -y && apt-get upgrade -y && useradd -m docker
+# Install required dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    curl jq build-essential libssl-dev libffi-dev libicu-dev python3 python3-venv python3-dev python3-pip \
+    && rm -rf /var/lib/apt/lists/*  # Cleanup to reduce image size
 
-# install python and the packages the your code depends on along with jq so we can parse JSON
-# add additional packages as necessary
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl jq build-essential libssl-dev libffi-dev libicu-dev python3 python3-venv python3-dev python3-pip
+# Create a non-root user for running the GitHub Actions runner
+RUN useradd -m docker
 
-# cd into the user directory, download and unzip the github actions runner
-RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
-    && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
-    && tar xzf ./actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz
+# Set working directory
+WORKDIR /home/docker/actions-runner
 
-# install some additional dependencies
-RUN chown -R docker ~docker && /home/docker/actions-runner/bin/installdependencies.sh
+# Download and extract the GitHub Actions runner
+RUN curl -L -o actions-runner-linux-arm64.tar.gz \
+    https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
+    && tar xzf actions-runner-linux-arm64.tar.gz \
+    && rm actions-runner-linux-arm64.tar.gz  # Cleanup tarball to save space
 
-# copy over the start.sh script
-COPY start.sh start.sh
+# Install additional dependencies for the runner
+RUN chown -R docker /home/docker && ./bin/installdependencies.sh
 
-# make the script executable
-RUN chmod +x start.sh
+# Copy the start script and make it executable
+COPY start.sh /home/docker/actions-runner/start.sh
+RUN chmod +x /home/docker/actions-runner/start.sh
 
-# since the config and run script for actions are not allowed to be run by root,
-# set the user to "docker" so all subsequent commands are run as the docker user
+# Switch to the non-root user
 USER docker
 
-# set the entrypoint to the start.sh script
+# Set the entrypoint
 ENTRYPOINT ["./start.sh"]
