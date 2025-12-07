@@ -35,6 +35,7 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     docker-ce-cli \
     docker-compose-plugin \
+    docker-buildx-plugin \
     && rm -rf /var/lib/apt/lists/*
 
 
