@@ -21,7 +21,7 @@ WORKDIR /home/docker/actions-runner
 ADD https://download.docker.com/linux/ubuntu/gpg /etc/apt/keyrings/docker.asc
 
 ## Add Docker's official GPG key:
-RUN apt-get update  \
+RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates curl jq libicu-dev python3-pip \
     && rm -rf /var/lib/apt/lists/* \
@@ -32,7 +32,9 @@ RUN apt-get update  \
   $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
   tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends docker-ce-cli \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    docker-ce-cli \
+    docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
 
