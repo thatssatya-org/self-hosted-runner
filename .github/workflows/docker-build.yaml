@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Build linux/arm64 Docker Image
         run: |
-          DOCKER_BUILDKIT=1 docker build -t thatssatyadocker/github-runner:latest .
+          DOCKER_BUILDKIT=1 docker build --platform linux/arm64 -t thatssatyadocker/github-runner:latest .
       - name: Push to Docker Hub
         run: |
           docker login -u thatssatyadocker -p ${{ secrets.DOCKER_HUB_SECRET }}
