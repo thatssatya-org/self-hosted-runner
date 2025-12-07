@@ -11,10 +11,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Build linux/arm64 Docker Image
-        run: |
-          DOCKER_BUILDKIT=1 docker build --platform linux/arm64 -t thatssatyadocker/github-runner:latest .
-      - name: Push to Docker Hub
-        run: |
-          docker login -u thatssatyadocker -p ${{ secrets.DOCKER_HUB_SECRET }}
-          docker push thatssatyadocker/github-runner:latest
+
+      # 1. Set up QEMU to emulate ARM64 on the x86 runner
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 2. Set up Docker Buildx (required for multi-platform builds)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: thatssatyadocker
+          password: ${{ secrets.DOCKER_HUB_SECRET }}
+
+      # 3. Build and Push using the official action (Cleaner and handles QEMU automatically)
+      - name: Build and Push linux/arm64 Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: thatssatyadocker/github-runner:latest
+          platforms: linux/arm64
