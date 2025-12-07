@@ -1,7 +1,7 @@
 FROM ubuntu:24.04 AS build
 
 # Set GitHub runner version
-ARG RUNNER_VERSION="2.323.0"
+ARG RUNNER_VERSION="2.330.0"
 
 ADD https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz \
     /home/docker/temp/
