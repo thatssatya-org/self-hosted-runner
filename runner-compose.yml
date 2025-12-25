@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       - ORGANIZATION=thatssatya-org
-      - ACCESS_TOKEN=${GITHUB_ACTION_RUNNER_SECRET}
+      - ACCESS_TOKEN=${GITHUB_ACTION_RUNNER_ACCESS_TOKEN}
       - DOCKER_GID=992
     group_add:
       - 992
